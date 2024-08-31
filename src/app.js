@@ -1,17 +1,16 @@
+const express = require("express");
+const cors = require("cors");
+require("dotenv").config();
 
-const express = require('express');
-const cors = require('cors');
-require('dotenv').config();
-
-const apiRoutes = require('./routes/api'); 
 const app = express();
 
-
-app.use(cors());
+// Middleware
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
+);
 app.use(express.json());
 
-
-app.use('/api', apiRoutes);
-
 module.exports = app;
-
