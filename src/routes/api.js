@@ -13,11 +13,15 @@ const {
   saveUserProfessions,
 } = require("../controllers/userController");
 
+const { getAllLanguages, createDeck } = require('../controllers/deckController');
+
 router.get("/check-interests", ensureAuthenticated, checkUserInterests);
 router.get("/check-professions", ensureAuthenticated, checkUserProfessions);
 router.get("/interests", ensureAuthenticated, getAllInterests);
 router.get("/professions", ensureAuthenticated, getAllProfessions);
 router.post("/user-interests", ensureAuthenticated, saveUserInterests);
 router.post("/user-professions", ensureAuthenticated, saveUserProfessions);
+router.get('/languages', ensureAuthenticated, getAllLanguages);
+router.post('/decks', ensureAuthenticated, createDeck);
 
 module.exports = router;
