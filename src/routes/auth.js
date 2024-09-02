@@ -14,12 +14,17 @@ router.get(
   "/auth/google/callback",
   passport.authenticate("google", { failureRedirect: "/login" }),
   (req, res) => {
-    res.redirect("http://localhost:3000/dashboard");
+    req.login(req.user, function (err) {
+      if (err) {
+        return res.redirect("http://localhost:3000/login");
+      }
+      return res.redirect("http://localhost:3000/dashboard");
+    });
   }
 );
 
-router.get('/logout', (req, res, next) => {
-  req.logout(function(err) {
+router.get("/logout", (req, res, next) => {
+  req.logout(function (err) {
     if (err) {
       return next(err);
     }
@@ -27,8 +32,8 @@ router.get('/logout', (req, res, next) => {
       if (err) {
         return next(err);
       }
-      res.clearCookie('connect.sid');
-      res.json({ success: true, message: 'Logged out successfully' });
+      res.clearCookie("connect.sid");
+      res.json({ success: true, message: "Logged out successfully" });
     });
   });
 });
