@@ -1,11 +1,11 @@
 const ensureAuthenticated = (req, res, next) => {
-    if (req.isAuthenticated()) {
-      return next();
-    } else {
-      res.status(401).json({ message: 'Access denied. Please log in.' });
-    }
-  };
-  
-  module.exports = ensureAuthenticated;
-  
+  console.log("req.isAuthenticated(): ", req.isAuthenticated());
+  console.log("req.user: ", req.user);
+  if (req.isAuthenticated()) {
+    return next();
+  } else {
+    res.status(401).json({ message: "Access denied. Please log in." });
+  }
+};
 
+module.exports = ensureAuthenticated;
