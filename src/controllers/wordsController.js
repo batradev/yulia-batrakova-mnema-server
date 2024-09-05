@@ -1,5 +1,9 @@
 const OpenAI = require("openai");
 const db = require("../db");
+const axios = require("axios");
+const fs = require("fs");
+const path = require("path");
+const { generatePrompt } = require("../prompts/promptTemplate");
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -41,29 +45,8 @@ const addWords = async (req, res) => {
 
   const professions = professionsRows.map((row) => row.name).join(", ");
 
-  const combinedPrompt = `
-    I'll provide a few words in ${nativeLanguageName}, please provide a short one-two word translation to ${targetLanguageName} for each word and generate a short mnemonic description for each translated word in ${nativeLanguageName}.
-    The mnemonic is going to be used to create a vivid visual image that enhances memory retention. 
-    Please provide only a valid plain compact JSON object in the response as in the following example for words "play" and "wolf":
-    [
-      {"word": "play", translation: "jouer", mnemonic_desc: "The word "jouer" from French sounds like "jaguar." Here's a jaguar playing soccer on a field, skillfully dribbling the ball, surrounded by a stadium filled with cheering fans." },
-      {"word": "wolf", translation: "loup", mnemonic_desc: "The word "loup" from French sounds like "loop." Picture a wolf running in a continuous loop, chasing its tail in an endless circle." }
-    ]
-    Don't add any comments or formatting to the response. The response should be pasable by any JSON parser right away.
-    The mnemonic should be personalized based on one of the person's interests (${interests}) or professions (${professions}), 
-    as this will evoke stronger emotional engagement and make the word easier to remember. 
+  const combinedPrompt = generatePrompt(nativeLanguageName, targetLanguageName, interests, professions, words);
 
-    These examples are only for illustrating what the mnemonic_desc content should be like and are based on a native English speaker learning French. Do not include the text in parentheses in your response.
-    Please adapt your response to the specific languages provided (${nativeLanguageName} and ${targetLanguageName}), and ensure that the total character count for each mnemonic description does not exceed 234 characters:
-
-    1. The word "jouer" from French sounds like "jaguar." Here's a jaguar playing soccer on a field, skillfully dribbling the ball, surrounded by a stadium filled with cheering fans. (For someone interested in sports)
-    2. The word "rêve" from French sounds like "raven." Imagine a raven flying through a dream, gliding silently over a surreal landscape. (For someone interested in poetry or gothic literature)
-    3. The word "loup" from French sounds like "loop." Picture a wolf running in a continuous loop, chasing its tail in an endless circle. (For someone interested in filmmaking or video game design)
-    4. The word "verre" from French sounds like "bear." Visualize a bear made entirely of glass, standing in a modern art gallery. (For someone interested in visual arts or museum curation)
-    5. The word "livre" from French sounds like "liver." Imagine a book shaped like a liver, sitting on a shelf in a medical library. (For someone in the medical field or studying anatomy)
-    Make the associations creative, relevant, and memorable.
-    The words: ${words.toString()}
-  `;
   const completionResponse = await openai.chat.completions.create({
     model: "gpt-4o-mini-2024-07-18",
     messages: [
@@ -87,6 +70,7 @@ const addWords = async (req, res) => {
   words_data.map(async (record) => {
     await db("words").insert({ ...record, deck_id });
   });
+
   res.status(200).json({ message: "Words processed successfully" });
 };
 
@@ -109,7 +93,98 @@ const getResults = async (req, res) => {
   }
 };
 
+const generateImages = async (req, res) => {
+  try {
+    const { words } = req.body;
+
+    if (!words || words.length === 0) {
+      return res
+        .status(400)
+        .json({ error: "No words provided for image generation" });
+    }
+
+    const assetsDir = path.join(__dirname, "../server_assets");
+
+    const dallEResponses = await Promise.all(
+      words.map(async (word) => {
+        const promptText = `Generate a detailed visual image based on this mnemonic description: ${word.mnemonic_desc}`;
+
+        const imageResponse = await axios.post(
+          "https://api.openai.com/v1/images/generations",
+          {
+            model: "dall-e-3",
+            prompt: promptText,
+            n: 1,
+            size: "1024x1024",
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        const imageUrl = imageResponse.data.data[0].url;
+
+        const imagePath = path.join(assetsDir, `${word.word}.png`);
+        await downloadImage(imageUrl, imagePath);
+
+        const imageUrlPath = `https://localhost:8080/server_assets/${word.word}.png`;
+
+        await db("words")
+          .where({ word: word.word })
+          .update({ image_path: imageUrlPath });
+
+        return { word: word.word, imagePath: imageUrlPath };
+      })
+    );
+
+    res
+      .status(200)
+      .json({ message: "Images generated successfully", data: dallEResponses });
+  } catch (error) {
+    console.error("Error generating images:", error);
+    res.status(500).json({ error: "Failed to generate images" });
+  }
+};
+
+const downloadImage = async (url, filepath) => {
+  const response = await axios({
+    url,
+    responseType: "stream",
+  });
+
+  return new Promise((resolve, reject) => {
+    const writer = fs.createWriteStream(filepath);
+    response.data.pipe(writer);
+    writer.on("finish", resolve);
+    writer.on("error", reject);
+  });
+};
+
+const getVisuals = async (req, res) => {
+  try {
+    const { deck_id } = req.query;
+
+    if (!deck_id) {
+      return res.status(400).json({ error: "Deck ID is required" });
+    }
+
+    const visuals = await db("words")
+      .where({ deck_id })
+      .select("word", "translation", "mnemonic_desc", "image_path");
+
+    res.status(200).json(visuals);
+  } catch (error) {
+    console.error("Error fetching visuals:", error);
+    res.status(500).json({ error: "Failed to fetch visuals" });
+  }
+};
+
 module.exports = {
   addWords,
   getResults,
+  generateImages,
+  getVisuals,
 };
