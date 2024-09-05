@@ -1,6 +1,6 @@
 const db = require("../db");
 
-exports.checkUserInterests = async (req, res) => {
+const checkUserInterests = async (req, res) => {
   try {
     console.log("checkUserInterests -> req.user", req.user);
     const userId = req.user.id;
@@ -17,7 +17,7 @@ exports.checkUserInterests = async (req, res) => {
   }
 };
 
-exports.getAllInterests = async (req, res) => {
+const getAllInterests = async (req, res) => {
   try {
     const interests = await db("interests").select("*");
     res.json(interests);
@@ -27,7 +27,7 @@ exports.getAllInterests = async (req, res) => {
   }
 };
 
-exports.saveUserInterests = async (req, res) => {
+const saveUserInterests = async (req, res) => {
   try {
     const userId = req.user.id;
     const { interests } = req.body;
@@ -48,7 +48,7 @@ exports.saveUserInterests = async (req, res) => {
   }
 };
 
-exports.checkUserProfessions = async (req, res) => {
+const checkUserProfessions = async (req, res) => {
   try {
     console.log("checkUserProfessions -> req.user", req.user);
     const userId = req.user.id;
@@ -65,7 +65,7 @@ exports.checkUserProfessions = async (req, res) => {
   }
 };
 
-exports.getAllProfessions = async (req, res) => {
+const getAllProfessions = async (req, res) => {
   try {
     const professions = await db("professions").select("*");
     res.json(professions);
@@ -75,7 +75,7 @@ exports.getAllProfessions = async (req, res) => {
   }
 };
 
-exports.saveUserProfessions = async (req, res) => {
+const saveUserProfessions = async (req, res) => {
   try {
     const userId = req.user.id;
     const { professions } = req.body;
@@ -94,4 +94,13 @@ exports.saveUserProfessions = async (req, res) => {
     console.error("Error", error);
     res.status(500).json({ error: "Failed to save professions" });
   }
+};
+
+module.exports = {
+  checkUserInterests,
+  getAllInterests,
+  saveUserInterests,
+  checkUserProfessions,
+  getAllProfessions,
+  saveUserProfessions,
 };

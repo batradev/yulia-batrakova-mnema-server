@@ -13,8 +13,8 @@ const {
   saveUserProfessions,
 } = require("../controllers/userController");
 
-const { getAllLanguages, createDeck } = require('../controllers/deckController');
-const { addWords, getResults } = require('../controllers/wordsController');
+const { getAllLanguages, createDeck, getDecks } = require('../controllers/deckController');
+const { addWords, getResults, generateImages, getVisuals } = require('../controllers/wordsController');
 
 router.get("/check-interests", ensureAuthenticated, checkUserInterests);
 router.get("/check-professions", ensureAuthenticated, checkUserProfessions);
@@ -24,7 +24,10 @@ router.post("/user-interests", ensureAuthenticated, saveUserInterests);
 router.post("/user-professions", ensureAuthenticated, saveUserProfessions);
 router.get('/languages', ensureAuthenticated, getAllLanguages);
 router.post('/decks', ensureAuthenticated, createDeck);
+router.get('/get-decks', ensureAuthenticated, getDecks);
 router.post('/words', ensureAuthenticated, addWords);
 router.get('/results', ensureAuthenticated, getResults);
+router.post('/generate-images', ensureAuthenticated, generateImages);
+router.get('/visuals', ensureAuthenticated, getVisuals);
 
 module.exports = router;
