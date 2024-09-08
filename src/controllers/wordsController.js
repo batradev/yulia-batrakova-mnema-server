@@ -143,6 +143,7 @@ const generateImages = async (req, res) => {
     res
       .status(200)
       .json({ message: "Images generated successfully", data: dallEResponses });
+      console.log (dallEResponses);
   } catch (error) {
     console.error("Error generating images:", error);
     res.status(500).json({ error: "Failed to generate images" });
