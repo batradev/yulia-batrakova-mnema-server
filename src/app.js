@@ -1,17 +1,18 @@
+const express = require("express");
+const cors = require("cors");
+require("dotenv").config();
+const path = require('path');
 
-const express = require('express');
-const cors = require('cors');
-require('dotenv').config();
-
-const apiRoutes = require('./routes/api'); 
 const app = express();
 
+app.use('/server_assets', express.static(path.join(__dirname, 'server_assets')));
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
+);
 app.use(express.json());
 
-
-app.use('/api', apiRoutes);
-
 module.exports = app;
-
