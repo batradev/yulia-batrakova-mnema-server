@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
+const ensureAuthenticated = require("../middleware/auth");
+const { getUsers } = require("../controllers/userController");
 
 router.get(
   "/auth/google",
@@ -36,6 +38,16 @@ router.get("/logout", (req, res, next) => {
       res.json({ success: true, message: "Logged out successfully" });
     });
   });
+});
+
+router.get("/admin", ensureAuthenticated, async (req, res, next) => {
+  if (req.user.is_admin) {
+    
+    getUsers(req, res);
+  } else {
+   
+    res.status(403).json({ message: "Access denied. Admins only." });
+  }
 });
 
 module.exports = router;

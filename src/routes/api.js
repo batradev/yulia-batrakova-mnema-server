@@ -11,6 +11,10 @@ const {
   checkUserProfessions,
   getAllProfessions,
   saveUserProfessions,
+  getUserProfile,
+  updateUserProfile,
+  getUsers,
+  deleteUser,
 } = require("../controllers/userController");
 
 const { getAllLanguages, createDeck, getDecks } = require('../controllers/deckController');
@@ -20,8 +24,13 @@ router.get("/check-interests", ensureAuthenticated, checkUserInterests);
 router.get("/check-professions", ensureAuthenticated, checkUserProfessions);
 router.get("/interests", ensureAuthenticated, getAllInterests);
 router.get("/professions", ensureAuthenticated, getAllProfessions);
+router.get("/user-profile", ensureAuthenticated, getUserProfile);
+router.post("/user-profile-update", ensureAuthenticated, updateUserProfile);
 router.post("/user-interests", ensureAuthenticated, saveUserInterests);
 router.post("/user-professions", ensureAuthenticated, saveUserProfessions);
+router.get("/admin/users", ensureAuthenticated, getUsers);
+router.delete("/admin/users/:userId", ensureAuthenticated, deleteUser);
+
 router.get('/languages', ensureAuthenticated, getAllLanguages);
 router.post('/decks', ensureAuthenticated, createDeck);
 router.get('/get-decks', ensureAuthenticated, getDecks);
