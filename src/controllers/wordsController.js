@@ -84,7 +84,7 @@ const getResults = async (req, res) => {
 
     const words = await db("words")
       .where({ deck_id })
-      .select("word", "translation", "mnemonic_desc");
+      .select("id", "word", "translation", "mnemonic_desc");
 
     res.status(200).json(words);
   } catch (error) {
@@ -103,7 +103,7 @@ const generateImages = async (req, res) => {
         .json({ error: "No words provided for image generation" });
     }
 
-    const assetsDir = path.join(__dirname, "../server_assets");
+    const assetsDir = path.join(__dirname, "../../server_assets");
 
     const dallEResponses = await Promise.all(
       words.map(async (word) => {
@@ -126,11 +126,12 @@ const generateImages = async (req, res) => {
         );
 
         const imageUrl = imageResponse.data.data[0].url;
+        const imageName = `${word.id}.png`;
 
-        const imagePath = path.join(assetsDir, `${word.word}.png`);
+        const imagePath = path.join(assetsDir, imageName);
         await downloadImage(imageUrl, imagePath);
 
-        const imageUrlPath = `https://localhost:8080/server_assets/${word.word}.png`;
+        const imageUrlPath = `https://localhost:8080/server_assets/${imageName}`;
 
         await db("words")
           .where({ word: word.word })
