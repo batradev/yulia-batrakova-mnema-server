@@ -103,7 +103,7 @@ const generateImages = async (req, res) => {
         .json({ error: "No words provided for image generation" });
     }
 
-    const assetsDir = path.join(__dirname, "../server_assets");
+    const assetsDir = path.join(__dirname, "../../server_assets");
 
     const dallEResponses = await Promise.all(
       words.map(async (word) => {
