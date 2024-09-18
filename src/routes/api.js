@@ -37,6 +37,7 @@ router.post('/decks', ensureAuthenticated, createDeck);
 router.get('/get-decks', ensureAuthenticated, getDecks);
 router.post('/words', ensureAuthenticated, addWords);
 router.get('/results', ensureAuthenticated, getResults);
+// router.get('/decks/:deckId/words', ensureAuthenticated, getResults);
 router.post('/generate-images', ensureAuthenticated, generateImages);
 router.get('/visuals', ensureAuthenticated, getVisuals);
 
