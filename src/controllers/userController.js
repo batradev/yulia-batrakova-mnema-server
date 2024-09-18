@@ -2,7 +2,6 @@ const db = require("../db");
 
 const checkUserInterests = async (req, res) => {
   try {
-    console.log("checkUserInterests -> req.user", req.user);
     const userId = req.user.id;
     const interests = await db("users_interests").where("user_id", userId);
 
@@ -54,7 +53,6 @@ const saveUserInterests = async (req, res) => {
 
 const checkUserProfessions = async (req, res) => {
   try {
-    console.log("checkUserProfessions -> req.user", req.user);
     const userId = req.user.id;
     const professions = await db("users_professions").where("user_id", userId);
 
