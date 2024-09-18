@@ -19,6 +19,7 @@ const {
 
 const { getAllLanguages, createDeck, getDecks } = require('../controllers/deckController');
 const { addWords, getResults, generateImages, getVisuals } = require('../controllers/wordsController');
+const { dbHealthCheck, simpleHealthCheck } = require('../controllers/healthCheck');
 
 router.get("/check-interests", ensureAuthenticated, checkUserInterests);
 router.get("/check-professions", ensureAuthenticated, checkUserProfessions);
@@ -39,5 +40,8 @@ router.get('/results', ensureAuthenticated, getResults);
 // router.get('/decks/:deckId/words', ensureAuthenticated, getResults);
 router.post('/generate-images', ensureAuthenticated, generateImages);
 router.get('/visuals', ensureAuthenticated, getVisuals);
+
+router.get('/db-health-check', dbHealthCheck);
+router.get('/health-check', simpleHealthCheck);
 
 module.exports = router;
