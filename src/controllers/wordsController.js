@@ -13,6 +13,31 @@ const openai = new OpenAI({
 const addWords = async (req, res) => {
   const { words, deck_id } = req.body;
   const user_id = req.user.id;
+  if (!req.user.is_admin) {
+    
+    const wordCountResult = await db('words')
+      .count('words.id as count')
+      .join('decks', 'decks.id', '=', 'words.deck_id')
+      .where('decks.user_id', req.user.id) 
+      .first(); 
+
+    const wordCount = wordCountResult.count; 
+
+    if (wordCount >= 15) {
+      return res
+        .status(403)
+        .json({ error: "Word limit exceeded. In this test version, you can only add up to 15 words. We're working on expanding this limit soon!" });
+    }
+
+    if (wordCount + words.length > 15) {
+      return res
+        .status(403)
+        .json({
+          error: `In this test version, you can only add ${15 - wordCount} more words. Stay tuned for improvements as we work to remove this limitation!`,
+        });
+    }
+  }
+
 
   const deck = await db("decks").where({ id: deck_id }).first();
   const { native_language_id, target_language_id } = deck;
