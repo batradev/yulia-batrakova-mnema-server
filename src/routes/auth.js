@@ -18,9 +18,9 @@ router.get(
   (req, res) => {
     req.login(req.user, function (err) {
       if (err) {
-        return res.redirect("http://localhost:3000/login");
+        return res.redirect(`${process.env.FRONTEND_URL}/login`);
       }
-      return res.redirect("http://localhost:3000/dashboard");
+      return res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
     });
   }
 );

@@ -162,7 +162,7 @@ const generateImages = async (req, res) => {
         const imagePath = path.join(assetsDir, imageName);
         await downloadImage(imageUrl, imagePath);
 
-        const imageUrlPath = `https://localhost:8080/server_assets/${imageName}`;
+        const imageUrlPath = `${process.env.REACT_APP_API_BASE_URL}/server_assets/${imageName}`;
 
         await db("words")
           .where({ id: word.id })
