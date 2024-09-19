@@ -14,7 +14,7 @@ app.use('/server_assets', express.static(path.join(__dirname, '../server_assets'
 
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: process.env.FRONTEND_URL,
     credentials: true,
   })
 );
@@ -32,6 +32,11 @@ app.use(
     }
   })
 );
+
+// it enables Express to properly handle the X-Forwarded-* headers, which affect 
+// URL generation and cookie security
+app.set('trust proxy', 1);
+
 app.use(passport.initialize());
 app.use(passport.session());
 

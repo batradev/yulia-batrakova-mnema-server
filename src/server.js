@@ -7,17 +7,17 @@ const fs = require('fs');
 const PORT = process.env.PORT || 8080;
 
 const startServer = () => {
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === 'production') {
+    http.createServer(app).listen(PORT, () => {
+      console.log(`Server is started`);
+    });
+  } else {
     const httpsOptions = {
-      key: fs.readFileSync("key.pem"),
-      cert: fs.readFileSync("cert.pem")
+      key: fs.readFileSync('key.pem'),
+      cert: fs.readFileSync('cert.pem')
     };
     https.createServer(httpsOptions, app).listen(PORT, () => {
       console.log(`Server is running on https://localhost:${PORT}`);
-    });
-  } else {
-    http.createServer(app).listen(PORT, () => {
-      console.log(`Server is started`);
     });
   }
 };
