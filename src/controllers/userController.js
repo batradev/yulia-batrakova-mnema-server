@@ -201,6 +201,10 @@ const deleteUser = async (req, res) => {
   }
 };
 
+const getUserRole = async (req, res) => {
+  res.json({ is_admin: req.user.is_admin });
+} 
+
 module.exports = {
   checkUserInterests,
   getAllInterests,
@@ -212,4 +216,5 @@ module.exports = {
   updateUserProfile,
   getUsers,
   deleteUser,
+  getUserRole,
 };
