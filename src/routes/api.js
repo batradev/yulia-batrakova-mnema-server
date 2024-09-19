@@ -15,6 +15,7 @@ const {
   updateUserProfile,
   getUsers,
   deleteUser,
+  getUserRole,
 } = require("../controllers/userController");
 
 const { getAllLanguages, createDeck, getDecks } = require('../controllers/deckController');
@@ -43,5 +44,7 @@ router.get('/visuals', ensureAuthenticated, getVisuals);
 
 router.get('/db-health-check', dbHealthCheck);
 router.get('/health-check', simpleHealthCheck);
+
+router.get('/user-role', ensureAuthenticated, getUserRole);
 
 module.exports = router;

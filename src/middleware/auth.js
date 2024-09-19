@@ -1,14 +1,8 @@
 const ensureAuthenticated = (req, res, next) => {
-  console.log("req.isAuthenticated(): ", req.isAuthenticated());
-  
   if (req.isAuthenticated()) {
     const adminEmail = 'batrakova.yulia@gmail.com'; 
 
-    if (req.user.email === adminEmail) {
-      req.user.is_admin = true; 
-    } else {
-      req.user.is_admin = false; 
-    }
+    req.user.is_admin = req.user.email === adminEmail;
     
     return next(); 
   } else {
