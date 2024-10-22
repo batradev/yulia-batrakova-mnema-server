@@ -1,50 +1,91 @@
 const express = require("express");
 const router = express.Router();
-const passport = require("passport");
-const ensureAuthenticated = require("../middleware/auth");
 const {
-  checkUserInterests,
-  getAllInterests,
+  ensureAuthenticated,
+  ensureUserIsAdmin,
+} = require("../middleware/auth");
+const {
+  getUser,
+  getUserInterests,
+  getUserProfessions,
   saveUserInterests,
-} = require("../controllers/userController");
-const {
-  checkUserProfessions,
-  getAllProfessions,
+  removeUserInterest,
+  removeUserProfession,
   saveUserProfessions,
-  getUserProfile,
-  updateUserProfile,
   getUsers,
   deleteUser,
-  getUserRole,
 } = require("../controllers/userController");
 
-const { getAllLanguages, createDeck, getDecks } = require('../controllers/deckController');
-const { addWords, getResults, generateImages, getVisuals } = require('../controllers/wordsController');
-const { dbHealthCheck, simpleHealthCheck } = require('../controllers/healthCheck');
+const { getAllInterests } = require("../controllers/interestsController");
+const { getAllProfessions } = require("../controllers/professionsController");
 
-router.get("/check-interests", ensureAuthenticated, checkUserInterests);
-router.get("/check-professions", ensureAuthenticated, checkUserProfessions);
+const {
+  getAllLanguages,
+  createDeck,
+  getDecks,
+  deleteDeck,
+} = require("../controllers/deckController");
+const {
+  addWords,
+  generateImages,
+  getWords,
+} = require("../controllers/wordsController");
+const {
+  dbHealthCheck,
+  simpleHealthCheck,
+} = require("../controllers/healthCheck");
+
+router.get("/users/:userId/interests", ensureAuthenticated, getUserInterests);
+router.get(
+  "/users/:userId/professions",
+  ensureAuthenticated,
+  getUserProfessions
+);
+
 router.get("/interests", ensureAuthenticated, getAllInterests);
 router.get("/professions", ensureAuthenticated, getAllProfessions);
-router.get("/user-profile", ensureAuthenticated, getUserProfile);
-router.post("/user-profile-update", ensureAuthenticated, updateUserProfile);
-router.post("/user-interests", ensureAuthenticated, saveUserInterests);
-router.post("/user-professions", ensureAuthenticated, saveUserProfessions);
-router.get("/admin/users", ensureAuthenticated, getUsers);
-router.delete("/admin/users/:userId", ensureAuthenticated, deleteUser);
 
-router.get('/languages', ensureAuthenticated, getAllLanguages);
-router.post('/decks', ensureAuthenticated, createDeck);
-router.get('/get-decks', ensureAuthenticated, getDecks);
-router.post('/words', ensureAuthenticated, addWords);
-router.get('/results', ensureAuthenticated, getResults);
-// router.get('/decks/:deckId/words', ensureAuthenticated, getResults);
-router.post('/generate-images', ensureAuthenticated, generateImages);
-router.get('/visuals', ensureAuthenticated, getVisuals);
+router.post("/users/:userId/interests", ensureAuthenticated, saveUserInterests);
+router.post(
+  "/users/:userId/professions",
+  ensureAuthenticated,
+  saveUserProfessions
+);
+router.delete(
+  "/users/:userId/interests/:interestId",
+  ensureAuthenticated,
+  removeUserInterest
+);
+router.delete(
+  "/users/:userId/professions/:professionId",
+  ensureAuthenticated,
+  removeUserProfession
+);
 
-router.get('/db-health-check', dbHealthCheck);
-router.get('/health-check', simpleHealthCheck);
+router.get("/users", ensureAuthenticated, ensureUserIsAdmin, getUsers);
+router.get("/users/:userId", ensureAuthenticated, getUser);
+router.delete("/users/:userId", ensureAuthenticated, deleteUser);
 
-router.get('/user-role', ensureAuthenticated, getUserRole);
+router.get("/languages", ensureAuthenticated, getAllLanguages);
+
+router.post("/users/:userId/decks", ensureAuthenticated, createDeck);
+router.get("/users/:userId/decks", ensureAuthenticated, getDecks);
+
+router.post(
+  "/users/:userId/decks/:deckId/words",
+  ensureAuthenticated,
+  addWords
+);
+router.get("/users/:userId/decks/:deckId/words", ensureAuthenticated, getWords);
+
+router.post(
+  "/users/:userId/decks/:deckId/words/generate-images",
+  ensureAuthenticated,
+  generateImages
+);
+router.delete("/users/:userId/decks/:deckId", ensureAuthenticated, deleteDeck);
+
+router.get("/db-health-check", dbHealthCheck);
+router.get("/health-check", simpleHealthCheck);
 
 module.exports = router;
