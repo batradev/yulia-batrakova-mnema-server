@@ -14,30 +14,31 @@ const addWords = async (req, res) => {
   const { words, deck_id } = req.body;
   const user_id = req.user.id;
   if (!req.user.is_admin) {
-    
-    const wordCountResult = await db('words')
-      .count('words.id as count')
-      .join('decks', 'decks.id', '=', 'words.deck_id')
-      .where('decks.user_id', req.user.id) 
-      .first(); 
+    const wordCountResult = await db("words")
+      .count("words.id as count")
+      .join("decks", "decks.id", "=", "words.deck_id")
+      .where("decks.user_id", req.user.id)
+      .first();
 
-    const wordCount = wordCountResult.count; 
+    const wordCount = wordCountResult.count;
 
     if (wordCount >= 15) {
       return res
         .status(403)
-        .json({ error: "Word limit exceeded. In this test version, you can only add up to 15 words. We're working on expanding this limit soon!" });
+        .json({
+          error:
+            "Word limit exceeded. In this test version, you can only add up to 15 words. We're working on expanding this limit soon!",
+        });
     }
 
     if (wordCount + words.length > 15) {
-      return res
-        .status(403)
-        .json({
-          error: `In this test version, you can only add ${15 - wordCount} more words. Stay tuned for improvements as we work to remove this limitation!`,
-        });
+      return res.status(403).json({
+        error: `In this test version, you can only add ${
+          15 - wordCount
+        } more words. Stay tuned for improvements as we work to remove this limitation!`,
+      });
     }
   }
-
 
   const deck = await db("decks").where({ id: deck_id }).first();
   const { native_language_id, target_language_id } = deck;
@@ -104,25 +105,6 @@ const addWords = async (req, res) => {
   });
 
   res.status(200).json({ message: "Words processed successfully" });
-};
-
-const getResults = async (req, res) => {
-  try {
-    const { deck_id } = req.query;
-
-    if (!deck_id) {
-      return res.status(400).json({ error: "Deck ID is required" });
-    }
-
-    const words = await db("words")
-      .where({ deck_id })
-      .select("id", "word", "translation", "mnemonic_desc");
-
-    res.status(200).json(words);
-  } catch (error) {
-    console.error("Error fetching results:", error);
-    res.status(500).json({ error: "Failed to fetch results" });
-  }
 };
 
 const generateImages = async (req, res) => {
@@ -196,28 +178,40 @@ const downloadImage = async (url, filepath) => {
   });
 };
 
-const getVisuals = async (req, res) => {
+const getWords = async (req, res) => {
   try {
-    const { deck_id } = req.query;
+    const { userId, deckId } = req.params;
+    const { type } = req.query;
 
-    if (!deck_id) {
+    if (!deckId) {
       return res.status(400).json({ error: "Deck ID is required" });
     }
 
-    const visuals = await db("words")
-      .where({ deck_id })
-      .select("word", "translation", "mnemonic_desc", "image_path");
+    if (type === "results") {
+      const words = await db("words")
+        .where({ deck_id: deckId })
+        .select("id", "word", "translation", "mnemonic_desc");
 
-    res.status(200).json(visuals);
+      return res.status(200).json(words);
+    } else if (type === "visuals") {
+      const visuals = await db("words")
+        .where({ deck_id: deckId })
+        .select("word", "translation", "mnemonic_desc", "image_path");
+
+      return res.status(200).json(visuals);
+    } else {
+      return res
+        .status(400)
+        .json({ error: "Invalid type parameter. Use 'results' or 'visuals'." });
+    }
   } catch (error) {
-    console.error("Error fetching visuals:", error);
-    res.status(500).json({ error: "Failed to fetch visuals" });
+    console.error("Error fetching words:", error);
+    res.status(500).json({ error: "Failed to fetch words" });
   }
 };
 
 module.exports = {
   addWords,
-  getResults,
   generateImages,
-  getVisuals,
+  getWords,
 };

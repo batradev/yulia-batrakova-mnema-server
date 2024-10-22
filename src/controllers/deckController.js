@@ -65,9 +65,32 @@ const getDecks = async (req, res) => {
     res.status(500).json({ error: "Failed to fetch decks" });
   }
 };
+const deleteDeck = async (req, res) => {
+  try {
+    const { deckId } = req.params;
+    const userId = req.user.id;  
+
+    const deck = await db('decks').where({ id: deckId, user_id: userId }).first();
+
+    if (!deck) {
+      return res.status(404).json({ error: 'Deck not found or does not belong to you.' });
+    }
+
+    await db('words').where({ deck_id: deckId }).del();
+
+    await db('decks').where({ id: deckId }).del();
+
+    res.status(200).json({ message: 'Deck deleted successfully.' });
+  } catch (error) {
+    console.error('Error deleting deck:', error);
+    res.status(500).json({ error: 'Failed to delete deck.' });
+  }
+};
+
 
 module.exports = {
   getAllLanguages,
   createDeck,
   getDecks,
+  deleteDeck,
 };
